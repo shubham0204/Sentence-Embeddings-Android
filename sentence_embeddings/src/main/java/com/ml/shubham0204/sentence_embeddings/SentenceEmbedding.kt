@@ -21,11 +21,11 @@ class SentenceEmbedding(
         tokenizerAssetsPath: String
     ) =
         withContext(Dispatchers.IO) {
-            hfTokenizer = HFTokenizer(modelAssetsPath)
+            hfTokenizer = HFTokenizer(tokenizerAssetsPath)
             ortEnvironment = OrtEnvironment.getEnvironment()
             ortSession =
                 ortEnvironment.createSession(
-                    context.assets.open(tokenizerAssetsPath).readBytes()
+                    context.assets.open(modelAssetsPath).readBytes()
                 )
         }
 
