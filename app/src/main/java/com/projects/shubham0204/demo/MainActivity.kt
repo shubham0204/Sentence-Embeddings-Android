@@ -1,4 +1,4 @@
-package com.ml.shubham0204.sentence_embeddings
+package com.projects.shubham0204.demo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,15 +23,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ml.shubham0204.sentence_embeddings.ui.components.AppProgressDialog
-import com.ml.shubham0204.sentence_embeddings.ui.components.hideProgressDialog
-import com.ml.shubham0204.sentence_embeddings.ui.components.setProgressDialogText
-import com.ml.shubham0204.sentence_embeddings.ui.components.showProgressDialog
-import com.ml.shubham0204.sentence_embeddings.ui.theme.SentenceEmbeddingsTheme
+import com.ml.shubham0204.sentence_embeddings.SentenceEmbedding
+import com.projects.shubham0204.demo.ui.components.AppProgressDialog
+import com.projects.shubham0204.demo.ui.components.hideProgressDialog
+import com.projects.shubham0204.demo.ui.components.setProgressDialogText
+import com.projects.shubham0204.demo.ui.components.showProgressDialog
+import com.projects.shubham0204.demo.ui.theme.SentenceEmbeddingsTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt

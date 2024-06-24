@@ -1,6 +1,5 @@
-package com.ml.shubham0204.sentence_embeddings.ui.theme
+package com.projects.shubham0204.demo.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

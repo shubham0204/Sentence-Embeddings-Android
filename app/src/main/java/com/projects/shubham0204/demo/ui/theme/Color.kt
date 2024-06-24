@@ -1,4 +1,4 @@
-package com.ml.shubham0204.sentence_embeddings.ui.theme
+package com.projects.shubham0204.demo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

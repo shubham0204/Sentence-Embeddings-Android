@@ -1,4 +1,4 @@
-package com.ml.shubham0204.sentence_embeddings.ui.components
+package com.projects.shubham0204.demo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
