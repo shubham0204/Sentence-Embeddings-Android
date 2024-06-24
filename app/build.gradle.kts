@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.ml.shubham0204.sentence_embeddings"
+    namespace = "com.projects.shubham0204.demo"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.ml.shubham0204.sentence_embeddings"
+        applicationId = "com.projects.shubham0204.demo"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
