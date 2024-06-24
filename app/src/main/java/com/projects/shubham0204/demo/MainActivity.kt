@@ -32,6 +32,7 @@ import com.projects.shubham0204.demo.ui.theme.SentenceEmbeddingsTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
                     LaunchedEffect(0) {
                         CoroutineScope(Dispatchers.IO).launch {
-                            sentenceEmbedding.init("all-MiniLM-L6-v2.onnx", copyToLocalStorage())
+                            sentenceEmbedding.init("all-MiniLM-L6-V2.onnx", copyToLocalStorage())
                             isModelLoaded = true
                         }
                     }
@@ -100,7 +101,6 @@ class MainActivity : ComponentActivity() {
                             setProgressDialogText("⚡ Encoding sentence 1...")
                             val t1 = System.currentTimeMillis()
                             val e1 = sentenceEmbedding.encode(sentence1)
-                            sentenceEmbedding.encode(sentence1)
                             setProgressDialogText("⚡ Encoding sentence 2..." )
                             val e2 = sentenceEmbedding.encode(sentence2)
                             cosineSimilarity = cosineDistance(e1,e2)
