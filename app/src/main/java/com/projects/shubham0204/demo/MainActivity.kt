@@ -31,19 +31,23 @@ import com.projects.shubham0204.demo.ui.components.showProgressDialog
 import com.projects.shubham0204.demo.ui.theme.SentenceEmbeddingsTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.Collections
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var sentenceEmbedding: SentenceEmbedding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val sentenceEmbedding = SentenceEmbedding(this)
+        sentenceEmbedding = SentenceEmbedding()
 
         setContent {
             SentenceEmbeddingsTheme {
@@ -52,10 +56,14 @@ class MainActivity : ComponentActivity() {
                     var isModelLoaded by remember{ mutableStateOf(false) }
 
                     LaunchedEffect(0) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            sentenceEmbedding.init("all-MiniLM-L6-V2.onnx", copyToLocalStorage())
-                            isModelLoaded = true
-                        }
+                        val modelBytes = assets.open("all-MiniLM-L6-V2.onnx").readBytes()
+                        val tokenizerBytes = copyToLocalStorage()
+                        sentenceEmbedding.init(
+                            modelBytes,
+                            tokenizerBytes,
+                            useXNNPack = true
+                        )
+                        isModelLoaded = true
                     }
 
                     if (!isModelLoaded) {
@@ -97,15 +105,14 @@ class MainActivity : ComponentActivity() {
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(onClick = {
-                            showProgressDialog()
-                            setProgressDialogText("⚡ Encoding sentence 1...")
-                            val t1 = System.currentTimeMillis()
-                            val e1 = sentenceEmbedding.encode(sentence1)
-                            setProgressDialogText("⚡ Encoding sentence 2..." )
-                            val e2 = sentenceEmbedding.encode(sentence2)
-                            cosineSimilarity = cosineDistance(e1,e2)
-                            inferenceTime = System.currentTimeMillis() - t1
-                            hideProgressDialog()
+                            CoroutineScope(Dispatchers.Default).launch {
+                                val results = predict(sentence1, sentence2)
+                                withContext(Dispatchers.Main) {
+                                    cosineSimilarity = results.first
+                                    inferenceTime = results.second
+                                }
+                            }
+
                         }) {
                             Text(text = "Calculate Similarity")
                         }
@@ -132,7 +139,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun cosineDistance(x1: FloatArray, x2: FloatArray): Float {
+    private suspend fun predict(
+        sentence1: String,
+        sentence2: String
+    ): Pair<Float,Long> = withContext(Dispatchers.IO) {
+        showProgressDialog()
+        setProgressDialogText("⚡ Encoding sentence 1...")
+        val t1 = System.currentTimeMillis()
+        val sentenceEmbeddings = Collections.synchronizedList(mutableListOf<FloatArray>())
+        listOf(
+            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence1)) } ,
+            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
+        ).joinAll()
+        val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
+        val inferenceTime = System.currentTimeMillis() - t1
+        hideProgressDialog()
+        return@withContext Pair(cosineSimilarity,inferenceTime)
+    }
+
+    private fun cosineDistance(
+        x1: FloatArray,
+        x2: FloatArray
+    ): Float {
         var mag1 = 0.0f
         var mag2 = 0.0f
         var product = 0.0f
@@ -146,13 +174,13 @@ class MainActivity : ComponentActivity() {
         return product / (mag1 * mag2)
     }
 
-    private fun copyToLocalStorage(): String {
+    private fun copyToLocalStorage(): ByteArray {
         val tokenizerBytes = assets.open("tokenizer.json").readBytes()
         val storageFile = File(filesDir, "tokenizer.json")
         if (!storageFile.exists()) {
             storageFile.writeBytes(tokenizerBytes)
         }
-        return storageFile.absolutePath
+        return storageFile.readBytes()
     }
 
 }
