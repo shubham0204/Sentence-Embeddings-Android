@@ -4,6 +4,7 @@
 
 [![](https://jitpack.io/v/shubham0204/Sentence-Embeddings-Android.svg)](https://jitpack.io/#shubham0204/Sentence-Embeddings-Android)
 
+![App Demo](resources/app_demo.gif)
 
 ## Setup
 
