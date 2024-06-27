@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     var isModelLoaded by remember{ mutableStateOf(false) }
 
                     LaunchedEffect(0) {
-                        val modelBytes = assets.open("all-MiniLM-L6-V2.onnx").readBytes()
+                        val modelBytes = assets.open("all-MiniLM-L6-V2.onnx").use{ it.readBytes() }
                         val tokenizerBytes = copyToLocalStorage()
                         sentenceEmbedding.init(
                             modelBytes,
