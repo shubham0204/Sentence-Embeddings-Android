@@ -50,7 +50,7 @@ dependencies {
 
 Sync the Gradle scripts and rebuild the project.
 
-### 3. (Optional) Download the ONNX model and `tokenizer.json` for `all-MiniLM-L2-V6`
+### 3. (Optional) Download the ONNX model and `tokenizer.json` for `all-MiniLM-L6-V2`
 
 > [!NOTE]
 > You may download the model and the tokenizer at runtime, as the library only expects raw-bytes of these files. If you wish to include them in the app's package, then proceed with this step
