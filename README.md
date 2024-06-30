@@ -6,6 +6,8 @@
 
 ![App Demo](resources/app_demo.gif)
 
+* Read the blog: [From Python To Android: HF Sentence Transformers (Embeddings)](https://proandroiddev.com/from-python-to-android-hf-sentence-transformers-embeddings-1ecea0ce94d8)
+
 ## Setup
 
 ### 1. Add the Jitpack repository to `settings.gradle.kts`
