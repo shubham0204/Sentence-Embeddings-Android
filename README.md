@@ -8,6 +8,18 @@
 
 * Read the blog: [From Python To Android: HF Sentence Transformers (Embeddings)](https://proandroiddev.com/from-python-to-android-hf-sentence-transformers-embeddings-1ecea0ce94d8)
 
+## Updates
+
+- 2024-08: Along with `token_ids` and `attention_mask`, the native library now also returns `token_type_ids` to support additional models like the `bge-small-en-v1.5` (issue #3)
+
+## Supported Models
+
+- [`all-minilm-l6-v2`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/tree/main)
+- [`bge-small-en-v1.5`](https://huggingface.co/BAAI/bge-small-en-v1.5)
+- [`snowflake-arctic-embed-s`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s)
+
+To add more models, refer the [Adding New Models](#adding-new-models) section. 
+
 ## Setup
 
 ### 1. Add the Jitpack repository to `settings.gradle.kts`
@@ -45,24 +57,12 @@ Add the `Sentence-Embeddings-Android` dependency to `build.gradle.kts`,
 ```kotlin
 dependencies {
     // ...
-    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.3")
+    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.4")
     // ...
 }
 ```
 
 Sync the Gradle scripts and rebuild the project.
-
-### 3. (Optional) Download the ONNX model and `tokenizer.json` for `all-MiniLM-L6-V2`
-
-> [!NOTE]
-> You may download the model and the tokenizer at runtime, as the library only expects raw-bytes of these files. If you wish to include them in the app's package, then proceed with this step
-
-The ONNX model and the tokenizer can be downloaded from the [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) repository,
-
-- Download [`model.onnx`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/blob/main/onnx/model.onnx)
-- Download [`tokenizer.json`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/blob/main/tokenizer.json)
-
-Place `model.onnx` and `tokenizer.json` in the `assets` folder of the application. 
 
 ## Usage
 
@@ -76,12 +76,21 @@ The `init` function takes two mandatory arguments, `modelBytes` and `tokenizerBy
 import com.ml.shubham0204.sentence_embeddings.SentenceEmbedding
 
 val sentenceEmbedding = SentenceEmbedding()
-val modelBytes: ByteArray = context.assets.open("all-MiniLM-L6-V2.onnx").use{ it.readBytes() }
-val tokenizerBytes: ByteArray = context.assets.open("tokenizer.json").use{ it.readBytes() }
+
+// Download the model and store it in the app's internal storage
+// (OR) copy the model from the assets folder (see the app module in the repo)
+val modelFile = File(filesDir, "model.onnx")
+val tokenizerFile = File(filesDir, "tokenizer.json")
+val tokenizerBytes = tokenizerFile.readBytes()
+
 CoroutineScope(Dispatchers.IO).launch {
     sentenceEmbedding.init(
-        modelBytes,
-        tokenizerBytes
+        modelFilepath = modelFile.absolutePath,
+        tokenizerBytes = tokenizerBytes,
+        useTokenTypeIds = false,
+        outputTensorName = "sentence_embedding",
+        useFP16 = false,
+        useXNNPack = false
     )
 }
 ```
@@ -132,3 +141,74 @@ CoroutineScope(Dispatchers.IO).launch {
     println( "Similarity between e1 and e3: $d13" )
 }
 ```
+
+## Adding New Models
+
+We demonstrate how the `snowflake-arctic-embed-s` model can be added to the sample application present in the `app` module.
+
+1. Download the [`model.onnx`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/onnx/model.onnx) and [`tokenizer.json`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/tokenizer.json) files from the HF [`snowflake-arctic-embed-s`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s) repository.
+
+2. Create a new sub-directory in `app/src/main/assets` named `snowflake-arctic-embed-s`, the copy the two files to the sub-directory.
+
+3. In `Config.kt`, add a new entry in the `Models` enum and a new branch in `getModelConfig` corresponding to the new model entry added in the enum,
+
+```kotlin
+enum class Model {
+    ALL_MINILM_L6_V2,
+    BGE_SMALL_EN_V1_5,
+    SNOWFLAKE_ARCTIC_EMBED_S // Add the new entry
+}
+
+fun getModelConfig(model: Model): ModelConfig {
+    return when (model) {
+        Model.ALL_MINILM_L6_V2 -> ModelConfig(
+            modelName = "all-minilm-l6-v2",
+            modelAssetsFilepath = "all-minilm-l6-v2/model.onnx",
+            tokenizerAssetsFilepath = "all-minilm-l6-v2/tokenizer.json",
+            useTokenTypeIds = false,
+            outputTensorName = "sentence_embedding"
+        )
+        Model.BGE_SMALL_EN_V1_5 -> ModelConfig(
+            modelName = "bge-small-en-v1.5",
+            modelAssetsFilepath = "bge-small-en-v1_5/model.onnx",
+            tokenizerAssetsFilepath = "bge-small-en-v1_5/tokenizer.json",
+            useTokenTypeIds = true,
+            outputTensorName = "last_hidden_state"
+        )
+        // Add a new branch for the model
+        Model.SNOWFLAKE_ARCTIC_EMBED_S -> ModelConfig(
+            modelName = "snowflake-arctic-embed-s",
+            modelAssetsFilepath = "snowflake-arctic-embed-s/model.onnx",
+            tokenizerAssetsFilepath = "snowflake-arctic-embed-s/tokenizer.json",
+            useTokenTypeIds = true,
+            outputTensorName = "last_hidden_state"
+        )
+    }
+}
+```
+
+4. To determine the values for `useTokenTypeIds` and `outputTensorName`, open the model with [Netron](https://github.com/lutzroeder/netron) or load the model in Python with [`onnxruntime`](https://github.com/microsoft/onnxruntime). We need to check the names of the input and output tensors.
+
+With Netron, check if `token_type_ids` is the name of an input tensor. Accordingly, set the value of `useTokenTypeIds` while creating an instance of `ModelConfig`. For `outputTensorName`, choose the name of the output tensor which provides the embedding. For the `snowflake-arctic-embed-s` model, the name of that output tensor is `last_hidden_state`.
+
+![Model input/output tensor names in Netron](resources/netron_image.png)
+
+The same information can be printed to the console with following Python snippet using the `onnxruntime` package,
+
+```python
+import onnxruntime as ort
+
+session = ort.InferenceSession("model.onnx" )
+
+print("Inputs: ")
+print( [ t.shape for t in session.get_inputs() ] )
+print( [ t.type for t in session.get_inputs() ] )
+print( [ t.name for t in session.get_inputs() ] )
+
+print("Outputs: ")
+print( [ t.shape for t in session.get_outputs() ] )
+print( [ t.type for t in session.get_outputs() ] )
+print( [ t.name for t in session.get_outputs() ] )
+```
+
+5. Run the app on the test-device
