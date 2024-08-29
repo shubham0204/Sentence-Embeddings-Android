@@ -59,7 +59,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
-    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.3")
+    implementation(project(":sentence_embeddings"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
