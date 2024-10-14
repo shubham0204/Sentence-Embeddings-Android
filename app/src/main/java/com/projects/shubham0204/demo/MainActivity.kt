@@ -1,6 +1,7 @@
 package com.projects.shubham0204.demo
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,7 +47,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
 import java.util.Collections
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -91,7 +91,8 @@ class MainActivity : ComponentActivity() {
                                         copyAndReturnPath(config.modelAssetsFilepath),
                                         copyAndReturnBytes(config.tokenizerAssetsFilepath),
                                         useTokenTypeIds = config.useTokenTypeIds,
-                                        outputTensorName = config.outputTensorName
+                                        outputTensorName = config.outputTensorName,
+                                        normalizeEmbeddings = config.normalizeEmbeddings
                                     )
                                     isModelLoaded = true
                                 }
@@ -224,12 +225,15 @@ class MainActivity : ComponentActivity() {
         val sentenceEmbeddings = Collections.synchronizedList(mutableListOf<FloatArray>())
         listOf(
             launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence1)) } ,
-            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
+            //launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
         ).joinAll()
-        val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
+
+        Log.d("Size", sentenceEmbeddings[0].size.toString())
+        Log.d("Size", sentenceEmbeddings[0].contentToString())
+        //val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
         val inferenceTime = System.currentTimeMillis() - t1
         hideProgressDialog()
-        return@withContext Pair(cosineSimilarity,inferenceTime)
+        return@withContext Pair(1.0f,inferenceTime)
     }
 
     private fun cosineDistance(
