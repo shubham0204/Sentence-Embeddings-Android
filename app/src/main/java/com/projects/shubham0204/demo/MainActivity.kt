@@ -225,15 +225,13 @@ class MainActivity : ComponentActivity() {
         val sentenceEmbeddings = Collections.synchronizedList(mutableListOf<FloatArray>())
         listOf(
             launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence1)) } ,
-            //launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
+            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
         ).joinAll()
 
-        Log.d("Size", sentenceEmbeddings[0].size.toString())
-        Log.d("Size", sentenceEmbeddings[0].contentToString())
-        //val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
+        val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
         val inferenceTime = System.currentTimeMillis() - t1
         hideProgressDialog()
-        return@withContext Pair(1.0f,inferenceTime)
+        return@withContext Pair(cosineSimilarity,inferenceTime)
     }
 
     private fun cosineDistance(
