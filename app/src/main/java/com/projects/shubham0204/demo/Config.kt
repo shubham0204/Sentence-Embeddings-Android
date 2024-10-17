@@ -21,7 +21,7 @@ fun getModelConfig(model: Model): ModelConfig {
             modelName = "all-minilm-l6-v2",
             modelAssetsFilepath = "all-minilm-l6-v2/model.onnx",
             tokenizerAssetsFilepath = "all-minilm-l6-v2/tokenizer.json",
-            useTokenTypeIds = true,
+            useTokenTypeIds = false,
             outputTensorName = "last_hidden_state",
             normalizeEmbeddings = true
         )

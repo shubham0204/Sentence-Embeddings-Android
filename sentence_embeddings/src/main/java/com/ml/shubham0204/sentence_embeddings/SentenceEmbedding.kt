@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import java.nio.LongBuffer
 import java.util.EnumSet
 import kotlin.math.max
+import kotlin.math.sqrt
 
 class SentenceEmbedding {
 
@@ -18,7 +19,7 @@ class SentenceEmbedding {
     private lateinit var ortSession: OrtSession
     private var useTokenTypeIds: Boolean = false
     private var outputTensorName: String = ""
-    private var normalizedEmbedding: Boolean = false
+    private var normalizeEmbedding: Boolean = false
 
     suspend fun init(
         modelFilepath: String,
@@ -44,7 +45,7 @@ class SentenceEmbedding {
         ortSession = ortEnvironment.createSession(modelFilepath,options)
         this@SentenceEmbedding.useTokenTypeIds = useTokenTypeIds
         this@SentenceEmbedding.outputTensorName = outputTensorName
-        this@SentenceEmbedding.normalizedEmbedding = normalizeEmbeddings
+        this@SentenceEmbedding.normalizeEmbedding = normalizeEmbeddings
         Log.d(SentenceEmbedding::class.simpleName, "Input Names: " + ortSession.inputNames.toList())
         Log.d(SentenceEmbedding::class.simpleName, "Output Names: " + ortSession.outputNames.toList())
     }
@@ -78,42 +79,32 @@ class SentenceEmbedding {
             inputTensorMap["token_type_ids"] = tokenTypeIdsTensor
         }
         val outputs = ortSession.run(inputTensorMap)
-        if(normalizedEmbedding) {
-            val tokenEmbeddings3D = outputs.get(0).value as Array<Array<FloatArray>> // Change to 3D array
-
-            val tokenEmbeddings = tokenEmbeddings3D[0]
-
-            val pooledEmbeddings = meanPooling(tokenEmbeddings, result.attentionMask)
-
-            val normalizedEmbedding = normalize(pooledEmbeddings)
-
-            return@withContext normalizedEmbedding
+        val tokenEmbeddings3D = outputs.get(0).value as Array<Array<FloatArray>>
+        val tokenEmbeddings = tokenEmbeddings3D[0]
+        val pooledEmbedding = meanPooling(tokenEmbeddings, result.attentionMask)
+        return@withContext if(normalizeEmbedding) {
+            normalize(pooledEmbedding)
         } else {
-
-            val embeddingTensor = outputs.get(outputTensorName).get() as OnnxTensor
-
-            return@withContext embeddingTensor.floatBuffer.array()
+            pooledEmbedding
         }
     }
 
     private fun meanPooling(tokenEmbeddings: Array<FloatArray>, attentionMask: LongArray): FloatArray {
-        val pooledEmbeddings = FloatArray(tokenEmbeddings[0].size) { 0f }
+        var pooledEmbeddings = FloatArray(tokenEmbeddings[0].size) { 0f }
         var validTokenCount = 0
 
-        for (i in tokenEmbeddings.indices) {
-            if (attentionMask[i] == 1L) { // Check if the token is valid
+        tokenEmbeddings
+            .filterIndexed{ index, _ -> attentionMask[index] == 1L }
+            .forEachIndexed{ index, token ->
                 validTokenCount++
-                for (j in tokenEmbeddings[i].indices) {
-                    pooledEmbeddings[j] += tokenEmbeddings[i][j]
+                token.forEachIndexed{ j, value ->
+                    pooledEmbeddings[j] += value
                 }
             }
-        }
 
         // Avoid division by zero
         val divisor = max(validTokenCount, 1)
-        for (j in pooledEmbeddings.indices) {
-            pooledEmbeddings[j] /= divisor.toFloat()
-        }
+        pooledEmbeddings = pooledEmbeddings.map{ it / divisor }.toFloatArray()
 
         return pooledEmbeddings
     }
@@ -121,8 +112,7 @@ class SentenceEmbedding {
     // Function to normalize embeddings
     private fun normalize(embeddings: FloatArray): FloatArray {
         // Calculate the L2 norm (Euclidean norm)
-        val norm = Math.sqrt(embeddings.sumOf { it * it.toDouble() }).toFloat()
-
+        val norm = sqrt(embeddings.sumOf{ it * it.toDouble() }).toFloat()
         // Normalize each embedding by dividing by the norm
         return embeddings.map { it / norm }.toFloatArray()
     }
