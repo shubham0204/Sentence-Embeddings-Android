@@ -6,7 +6,8 @@ class HFTokenizer(tokenizerBytes: ByteArray) {
 
     data class Result(
         val ids: LongArray = longArrayOf(),
-        val attentionMask: LongArray = longArrayOf()
+        val attentionMask: LongArray = longArrayOf(),
+        val tokenTypeIds: LongArray = longArrayOf()
     )
 
     private val tokenizerPtr: Long = createTokenizer(tokenizerBytes)
@@ -26,7 +27,12 @@ class HFTokenizer(tokenizerBytes: ByteArray) {
         for (i in 0 until attentionMaskArray.length()) {
             attentionMask[i] = (attentionMaskArray.get(i) as Int).toLong()
         }
-        return Result(ids, attentionMask)
+        val tokenTypeIdsArray = jsonObject.getJSONArray("token_type_ids")
+        val tokenTypeIds = LongArray(tokenTypeIdsArray.length())
+        for (i in 0 until tokenTypeIdsArray.length()) {
+            tokenTypeIds[i] = (tokenTypeIdsArray.get(i) as Int).toLong()
+        }
+        return Result(ids, attentionMask, tokenTypeIds)
     }
 
     fun close() {
