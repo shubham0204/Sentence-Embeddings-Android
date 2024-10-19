@@ -57,7 +57,7 @@ Add the `Sentence-Embeddings-Android` dependency to `build.gradle.kts`,
 ```kotlin
 dependencies {
     // ...
-    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.4")
+    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.5")
     // ...
 }
 ```
