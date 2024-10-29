@@ -9,6 +9,7 @@ use tokenizers::Tokenizer;
 struct TokenizationResult {
     ids: Vec<u32>,
     attention_mask: Vec<u32>,
+    token_type_ids: Vec<u32>
 }
 
 #[no_mangle]
@@ -44,6 +45,7 @@ pub extern "C" fn Java_com_ml_shubham0204_sentence_1embeddings_HFTokenizer_token
     let result = TokenizationResult {
         ids: encoding.get_ids().to_vec(),
         attention_mask: encoding.get_attention_mask().to_vec(),
+        token_type_ids: encoding.get_type_ids().to_vec()
     };
     let result_json_str =
         serde_json::to_string(&result).expect("Could not convert tokenization result to JSON");
