@@ -1,7 +1,6 @@
 package com.projects.shubham0204.demo
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -52,7 +51,6 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
-
     private lateinit var sentenceEmbedding: SentenceEmbedding
     private val modelConfigState = mutableStateOf<ModelConfig?>(null)
     private val showChooseModelDialogState = mutableStateOf(true)
@@ -67,22 +65,20 @@ class MainActivity : ComponentActivity() {
             SentenceEmbeddingsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
+                    Column(
+                        modifier =
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 16.dp),
+                    ) {
+                        var isModelLoaded by remember { mutableStateOf(false) }
+                        val modelConfig by remember { modelConfigState }
 
-
-
-
-                    Column(modifier= Modifier
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp)) {
-
-                        var isModelLoaded by remember{ mutableStateOf(false) }
-                        val modelConfig by remember{ modelConfigState }
-
-                        var sentence1 by remember{ mutableStateOf("What is the population of London?") }
-                        var sentence2 by remember{ mutableStateOf("Delhi has a population of 32 million") }
-                        var cosineSimilarity by remember{ mutableStateOf<Float?>(null) }
-                        var inferenceTime by remember{ mutableStateOf<Long?>(null) }
+                        var sentence1 by remember { mutableStateOf("What is the population of London?") }
+                        var sentence2 by remember { mutableStateOf("Delhi has a population of 32 million") }
+                        var cosineSimilarity by remember { mutableStateOf<Float?>(null) }
+                        var inferenceTime by remember { mutableStateOf<Long?>(null) }
 
                         modelConfig?.let { config ->
                             CoroutineScope(Dispatchers.IO).launch {
@@ -92,7 +88,7 @@ class MainActivity : ComponentActivity() {
                                         copyAndReturnBytes(config.tokenizerAssetsFilepath),
                                         useTokenTypeIds = config.useTokenTypeIds,
                                         outputTensorName = config.outputTensorName,
-                                        normalizeEmbeddings = config.normalizeEmbeddings
+                                        normalizeEmbeddings = config.normalizeEmbeddings,
                                     )
                                     isModelLoaded = true
                                 }
@@ -102,76 +98,78 @@ class MainActivity : ComponentActivity() {
                         if (isModelLoaded) {
                             Text(
                                 text = "Using ${modelConfig?.modelName} from 🤗 sentence-transformers",
-                                style = MaterialTheme.typography.headlineSmall
+                                style = MaterialTheme.typography.headlineSmall,
                             )
                             Spacer(modifier = Modifier.height(24.dp))
 
                             TextField(
-                                modifier = Modifier.fillMaxWidth() ,
+                                modifier = Modifier.fillMaxWidth(),
                                 value = sentence1,
                                 onValueChange = { sentence1 = it },
-                                placeholder = { Text(text = "Enter first sentence...")}
+                                placeholder = { Text(text = "Enter first sentence...") },
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             TextField(
-                                modifier = Modifier.fillMaxWidth() ,
+                                modifier = Modifier.fillMaxWidth(),
                                 value = sentence2,
                                 onValueChange = { sentence2 = it },
-                                placeholder = { Text(text = "Enter second sentence...")}
+                                placeholder = { Text(text = "Enter second sentence...") },
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Row {
                                 Button(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-                                        .weight(1f),
+                                    modifier =
+                                        Modifier
+                                            .padding(4.dp)
+                                            .fillMaxWidth()
+                                            .weight(1f),
                                     onClick = {
-                                    CoroutineScope(Dispatchers.Default).launch {
-                                        val results = predict(sentence1, sentence2)
-                                        withContext(Dispatchers.Main) {
-                                            cosineSimilarity = results.first
-                                            inferenceTime = results.second
+                                        CoroutineScope(Dispatchers.Default).launch {
+                                            val results = predict(sentence1, sentence2)
+                                            withContext(Dispatchers.Main) {
+                                                cosineSimilarity = results.first
+                                                inferenceTime = results.second
+                                            }
                                         }
-                                    }
-                                }) {
+                                    },
+                                ) {
                                     Text(text = "Similarity Score")
                                 }
                                 Button(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .fillMaxWidth()
-                                        .weight(1f),
+                                    modifier =
+                                        Modifier
+                                            .padding(4.dp)
+                                            .fillMaxWidth()
+                                            .weight(1f),
                                     onClick = {
                                         modelConfigState.value = null
                                         cosineSimilarity = null
                                         isModelLoaded = false
                                         showChooseModelDialogState.value = true
-                                }) {
+                                    },
+                                ) {
                                     Text(text = "Choose model")
                                 }
                             }
-
                         }
 
                         cosineSimilarity?.let {
                             Spacer(modifier = Modifier.height(24.dp))
-                            Text(text = "Inference time (millis): $inferenceTime ms" )
+                            Text(text = "Inference time (millis): $inferenceTime ms")
                             Spacer(modifier = Modifier.height(8.dp))
                             LinearProgressIndicator(
                                 modifier = Modifier.fillMaxWidth(),
-                                progress = (it + 1.0f) / 2f
+                                progress = (it + 1.0f) / 2f,
                             )
                             Text(
                                 text = it.toString(),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelSmall,
                             )
                         }
 
                         AppProgressDialog()
                         ChooseModelDialog()
                     }
-
                 }
             }
         }
@@ -180,27 +178,31 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun ChooseModelDialog() {
         var showDialog by remember { showChooseModelDialogState }
-        val modelConfigs = Model.entries.map{ getModelConfig(it) }
+        val modelConfigs = Model.entries.map { getModelConfig(it) }
         if (showDialog) {
-            Dialog(onDismissRequest = { /** Non cancellable dialog **/ }) {
-                Column(modifier = Modifier
-                    .padding(16.dp)
-                    .background(Color.White, RoundedCornerShape(16.dp))
-                    .padding(24.dp)
-                    .fillMaxWidth()
+            Dialog(onDismissRequest = {
+                /** Non cancellable dialog **/
+            }) {
+                Column(
+                    modifier =
+                        Modifier
+                            .padding(16.dp)
+                            .background(Color.White, RoundedCornerShape(16.dp))
+                            .padding(24.dp)
+                            .fillMaxWidth(),
                 ) {
                     Text(text = "Choose model", fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     LazyColumn {
                         items(modelConfigs) {
                             Text(
-                                modifier = Modifier
-                                    .clickable {
-                                        showDialog = false
-                                        modelConfigState.value = it
-                                    }
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
+                                modifier =
+                                    Modifier
+                                        .clickable {
+                                            showDialog = false
+                                            modelConfigState.value = it
+                                        }.padding(16.dp)
+                                        .fillMaxWidth(),
                                 text = it.modelName,
                             )
                         }
@@ -217,26 +219,27 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun predict(
         sentence1: String,
-        sentence2: String
-    ): Pair<Float,Long> = withContext(Dispatchers.IO) {
-        showProgressDialog()
-        setProgressDialogText("⚡ Encoding sentence 1...")
-        val t1 = System.currentTimeMillis()
-        val sentenceEmbeddings = Collections.synchronizedList(mutableListOf<FloatArray>())
-        listOf(
-            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence1)) } ,
-            launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) }
-        ).joinAll()
+        sentence2: String,
+    ): Pair<Float, Long> =
+        withContext(Dispatchers.IO) {
+            showProgressDialog()
+            setProgressDialogText("⚡ Encoding sentence 1...")
+            val t1 = System.currentTimeMillis()
+            val sentenceEmbeddings = Collections.synchronizedList(mutableListOf<FloatArray>())
+            listOf(
+                launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence1)) },
+                launch { sentenceEmbeddings.add(sentenceEmbedding.encode(sentence2)) },
+            ).joinAll()
 
-        val cosineSimilarity = cosineDistance(sentenceEmbeddings[0],sentenceEmbeddings[1])
-        val inferenceTime = System.currentTimeMillis() - t1
-        hideProgressDialog()
-        return@withContext Pair(cosineSimilarity,inferenceTime)
-    }
+            val cosineSimilarity = cosineDistance(sentenceEmbeddings[0], sentenceEmbeddings[1])
+            val inferenceTime = System.currentTimeMillis() - t1
+            hideProgressDialog()
+            return@withContext Pair(cosineSimilarity, inferenceTime)
+        }
 
     private fun cosineDistance(
         x1: FloatArray,
-        x2: FloatArray
+        x2: FloatArray,
     ): Float {
         var mag1 = 0.0f
         var mag2 = 0.0f
@@ -280,5 +283,4 @@ class MainActivity : ComponentActivity() {
         }
         return storageFile.readBytes()
     }
-
 }
