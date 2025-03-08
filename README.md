@@ -10,7 +10,19 @@
 
 ## Updates
 
-- 2024-08: Along with `token_ids` and `attention_mask`, the native library now also returns `token_type_ids` to support additional models like the `bge-small-en-v1.5` (issue #3)
+### 2025-03
+
+- Move the Rust source code from the `libs` branch to the `main` branch: We now use the [rust-android-plugin](https://github.com/mozilla/rust-android-gradle/issues/29) to initiate `cargo build` from Gradle
+
+- Removed Git LFS: The ONNX models present in `app/src/main/assets` have been removed from the repository. Instead, `app/build.gradle.kts` downloads the models and tokenizer configs from HuggingFace using `download_model.sh` shell script.
+
+- Add [Model2Vec](https://huggingface.co/blog/Pringled/model2vec): Model2Vec provides static sentence-embeddings through a fast-lookup
+
+- Remove Jitpack: A GitHub CI script now builds AARs for `model2vec` and `sentence_embeddings` Gradle modules that can be included in other projects
+
+### 2024-08
+
+- Along with `token_ids` and `attention_mask`, the native library now also returns `token_type_ids` to support additional models like the `bge-small-en-v1.5` (issue #3)
 
 ## Supported Models
 
@@ -20,44 +32,16 @@
 
 To add more models, refer the [Adding New Models](#adding-new-models) section. 
 
-## Setup
+## Installation
 
-### 1. Add the Jitpack repository to `settings.gradle.kts`
-
-The library is hosted with [Jitpack](https://jitpack.io/). Add the `jitpack.io` repository in `settings.gradle.kts` for Gradle to search Jitpack packages,
-
-```kotlin
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven{ url = uri("https://jitpack.io") }
-    }
-}
-```
-
-or with Groovy build scripts,
-
-```groovy
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        maven { url "https://jitpack.io" }
-    }
-}
-```
-
-### 2. Add the dependency to `build.gradle.kts`
-
-Add the `Sentence-Embeddings-Android` dependency to `build.gradle.kts`,
+The AARs for the `sentence_embeddings` and `model2vec` modules are available in the [Releases](https://github.com/shubham0204/Sentence-Embeddings-Android/releases) which can be downloaded. Add the AARs to the `app/libs` directory and then in `app/build.gradle.kts`,
 
 ```kotlin
 dependencies {
     // ...
-    implementation("com.github.shubham0204:Sentence-Embeddings-Android:0.0.5")
+    // Add one or both of them as needed
+    implementation(file("libs/sentence_embeddings.aar"))
+    implementation(file("libs/model2vec.aar"))
     // ...
 }
 ```
