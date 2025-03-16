@@ -23,3 +23,5 @@ dependencyResolutionManagement {
 rootProject.name = "Sentence Embeddings"
 include(":app")
 include(":sentence_embeddings")
+include(":model2vec")
+include(":app-model2vec")
