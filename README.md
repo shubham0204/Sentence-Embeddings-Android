@@ -46,7 +46,48 @@ dependencies {
 }
 ```
 
-Sync the Gradle scripts and rebuild the project.
+## Building the Project
+
+# Build Instructions
+
+1. Set up Android NDK version r27c
+   ```bash
+   # Using the nttld/setup-ndk action
+   # Example manual equivalent:
+   wget https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
+   unzip android-ndk-r27c-linux.zip
+   export ANDROID_NDK_HOME=/path/to/android-ndk-r27c
+   ```
+
+2. Install Rust targets for Android
+   ```bash
+   rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+   ```
+
+3. Build the Rust code
+   ```bash
+   ./gradlew cargoBuild --stacktrace
+   ```
+
+4. Build AAR for sentence_embeddings module
+   ```bash
+   ./gradlew :sentence_embeddings:assembleRelease --stacktrace
+   ```
+
+5. Build AAR for model2vec module
+   ```bash
+   ./gradlew :model2vec:assembleRelease --stacktrace
+   ```
+
+6. Build APK for app module
+   ```bash
+   ./gradlew :app:assembleRelease --stacktrace
+   ```
+
+7. Build APK for app-model2vec module
+   ```bash
+   ./gradlew :app-model2vec:assembleRelease --stacktrace
+   ```
 
 ## Usage
 
