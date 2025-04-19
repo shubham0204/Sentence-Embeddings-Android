@@ -52,9 +52,6 @@ cargo {
     targets = listOf("arm", "arm64", "x86", "x86_64")
     profile = "release"
     verbose = true
-    features {
-        "jni"
-    }
 }
 
 dependencies {

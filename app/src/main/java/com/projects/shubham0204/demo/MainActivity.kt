@@ -201,7 +201,8 @@ class MainActivity : ComponentActivity() {
                                         .clickable {
                                             showDialog = false
                                             modelConfigState.value = it
-                                        }.padding(16.dp)
+                                        }
+                                        .padding(16.dp)
                                         .fillMaxWidth(),
                                 text = it.modelName,
                             )

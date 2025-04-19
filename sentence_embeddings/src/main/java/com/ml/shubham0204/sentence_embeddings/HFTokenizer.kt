@@ -2,19 +2,18 @@ package com.ml.shubham0204.sentence_embeddings
 
 import org.json.JSONObject
 
-class HFTokenizer(tokenizerBytes: ByteArray) {
-
+class HFTokenizer(
+    tokenizerBytes: ByteArray,
+) {
     data class Result(
         val ids: LongArray = longArrayOf(),
         val attentionMask: LongArray = longArrayOf(),
-        val tokenTypeIds: LongArray = longArrayOf()
+        val tokenTypeIds: LongArray = longArrayOf(),
     )
 
     private val tokenizerPtr: Long = createTokenizer(tokenizerBytes)
 
-    fun tokenize(
-        text: String
-    ): Result {
+    fun tokenize(text: String): Result {
         val output = tokenize(tokenizerPtr, text)
         val jsonObject = JSONObject(output)
         val idsArray = jsonObject.getJSONArray("ids")
@@ -39,18 +38,14 @@ class HFTokenizer(tokenizerBytes: ByteArray) {
         deleteTokenizer(tokenizerPtr)
     }
 
-    private external fun createTokenizer(
-        tokenizerBytes: ByteArray
-    ): Long
+    private external fun createTokenizer(tokenizerBytes: ByteArray): Long
 
     private external fun tokenize(
         tokenizerPtr: Long,
-        text: String
+        text: String,
     ): String
 
-    private external fun deleteTokenizer(
-        tokenizerPtr: Long
-    )
+    private external fun deleteTokenizer(tokenizerPtr: Long)
 
     companion object {
         init {

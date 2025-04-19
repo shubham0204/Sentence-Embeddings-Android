@@ -44,7 +44,9 @@ fun AppProgressDialog() {
                     Text(
                         text = progressDialogText.value,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                     )
                 }
             }

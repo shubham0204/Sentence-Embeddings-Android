@@ -160,7 +160,9 @@ class MainActivity : ComponentActivity() {
         fileName: String,
         wordCount: Int,
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Card(modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Button(onClick = onFileSelected) {
                     Text(text = "Select File")
