@@ -1,9 +1,12 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 // The rust-android-gradle plugin has to be declared before the Android/Kotlin plugins
 // see: https://github.com/mozilla/rust-android-gradle/issues/147#issuecomment-2134688017
 plugins {
     id("org.mozilla.rust-android-gradle.rust-android") version "0.9.6"
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.vanniktech.maven.publish") version "0.32.0"
 }
 
 // Used in GitHub CI to pass the path of the installed Android NDK
@@ -52,6 +55,43 @@ cargo {
     targets = listOf("arm", "arm64", "x86", "x86_64")
     profile = "release"
     verbose = true
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    coordinates(
+        "io.gitlab.shubham0204",
+        "model2vec",
+        "0.0.6",
+    )
+    pom {
+        name = "Sentence-Embeddings-Android"
+        description =
+            "Embeddings from sentence-transformers in Android! Supports all-MiniLM-L6-V2, bge-small-en, snowflake-arctic, model2vec models and more "
+        inceptionYear = "2024"
+        url = "https://github.com/shubham0204/Sentence-Embeddings-Android"
+        version = "v6"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "shubham0204"
+                name = "Shubham Panchal"
+                url = "https://github.com/shubham0204"
+            }
+        }
+        scm {
+            url = "https://github.com/shubham0204/Sentence-Embeddings-Android"
+            connection = "scm:git:git://github.com/shubham0204/Sentence-Embeddings-Android.git"
+            developerConnection = "scm:git:ssh://git@github.com/shubham0204/Sentence-Embeddings-Android.git"
+        }
+    }
 }
 
 dependencies {
