@@ -1,28 +1,43 @@
 # Sentence Embeddings in Android
 
-> An Android library that provides a port to sentence-transformers, which are used to generate sentence embeddings (fixed-size vectors for text/sentences)
+> An Android library that provides a port to sentence-transformers, which are used to generate
+> sentence embeddings (fixed-size vectors for text/sentences)
 
 [![](https://jitpack.io/v/shubham0204/Sentence-Embeddings-Android.svg)](https://jitpack.io/#shubham0204/Sentence-Embeddings-Android)
 
 ![App Demo](resources/app_demo.gif)
 
-* Read the blog: [From Python To Android: HF Sentence Transformers (Embeddings)](https://proandroiddev.com/from-python-to-android-hf-sentence-transformers-embeddings-1ecea0ce94d8)
+* Read the
+  blog: [From Python To Android: HF Sentence Transformers (Embeddings)](https://proandroiddev.com/from-python-to-android-hf-sentence-transformers-embeddings-1ecea0ce94d8)
 
 ## Updates
 
+### 2025-06
+
+- Add support for 16 KB page-size Android devices by [updating project NDK version to r28b](https://developer.android.com/guide/practices/page-sizes#kotlin_1)
+
+- Modify Gradle scripts of `sentence_embeddings` and `model2vec` modules to publish the AAR as a package on Maven Central
+
 ### 2025-03
 
-- Move the Rust source code from the `libs` branch to the `main` branch: We now use the [rust-android-plugin](https://github.com/mozilla/rust-android-gradle/issues/29) to initiate `cargo build` from Gradle
+- Move the Rust source code from the `libs` branch to the `main` branch: We now use
+  the [rust-android-plugin](https://github.com/mozilla/rust-android-gradle/issues/29) to initiate
+  `cargo build` from Gradle
 
-- Removed Git LFS: The ONNX models present in `app/src/main/assets` have been removed from the repository. Instead, `app/build.gradle.kts` downloads the models and tokenizer configs from HuggingFace using `download_model.sh` shell script.
+- Removed Git LFS: The ONNX models present in `app/src/main/assets` have been removed from the
+  repository. Instead, `app/build.gradle.kts` downloads the models and tokenizer configs from
+  HuggingFace using `download_model.sh` shell script.
 
-- Add [Model2Vec](https://huggingface.co/blog/Pringled/model2vec): Model2Vec provides static sentence-embeddings through a fast-lookup
+- Add [Model2Vec](https://huggingface.co/blog/Pringled/model2vec): Model2Vec provides static
+  sentence-embeddings through a fast-lookup
 
-- Remove Jitpack: A GitHub CI script now builds AARs for `model2vec` and `sentence_embeddings` Gradle modules that can be included in other projects
+- Remove Jitpack: A GitHub CI script now builds AARs for `model2vec` and `sentence_embeddings`
+  Gradle modules that can be included in other projects
 
 ### 2024-08
 
-- Along with `token_ids` and `attention_mask`, the native library now also returns `token_type_ids` to support additional models like the `bge-small-en-v1.5` (issue #3)
+- Along with `token_ids` and `attention_mask`, the native library now also returns `token_type_ids`
+  to support additional models like the `bge-small-en-v1.5` (issue #3)
 
 ## Supported Models
 
@@ -30,11 +45,34 @@
 - [`bge-small-en-v1.5`](https://huggingface.co/BAAI/bge-small-en-v1.5)
 - [`snowflake-arctic-embed-s`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s)
 
-To add more models, refer the [Adding New Models](#adding-new-models) section. 
+To add more models, refer the [Adding New Models](#adding-new-models) section.
 
 ## Installation
 
-The AARs for the `sentence_embeddings` and `model2vec` modules are available in the [Releases](https://github.com/shubham0204/Sentence-Embeddings-Android/releases) which can be downloaded. Add the AARs to the `app/libs` directory and then in `app/build.gradle.kts`,
+### Maven Artifacts
+
+Include the following in your `build.gradle` script,
+
+```groovy
+dependencies {
+    // ... other packages
+    
+    // To use sentence-embeddings
+    implementation 'io.gitlab.shubham0204:sentence-embeddings:v6'
+    
+    // To also use model2vec
+    implementation 'io.gitlab.shubham0204:model2vec:v6'
+}
+```
+
+- [`sentence-embeddings` Maven package](https://central.sonatype.com/artifact/io.gitlab.shubham0204/sentence-embeddings/v6)
+- [`model2vec` Maven package](https://central.sonatype.com/artifact/io.gitlab.shubham0204/model2vec/v6)
+
+### Using the AAR from the Releases directly
+
+The AARs for the `sentence_embeddings` and `model2vec` modules are available in
+the [Releases](https://github.com/shubham0204/Sentence-Embeddings-Android/releases) which can be
+downloaded. Add the AARs to the `app/libs` directory and then in `app/build.gradle.kts`,
 
 ```kotlin
 dependencies {
@@ -47,8 +85,6 @@ dependencies {
 ```
 
 ## Building the Project
-
-# Build Instructions
 
 1. Set up Android NDK version r27c
    ```bash
@@ -93,7 +129,8 @@ dependencies {
 
 ### API
 
-The library provides a `SentenceEmbedding` class with `init` and `encode` suspend functions that initialize the model and generate the sentence embedding respectively. 
+The library provides a `SentenceEmbedding` class with `init` and `encode` suspend functions that
+initialize the model and generate the sentence embedding respectively.
 
 The `init` function takes two mandatory arguments, `modelBytes` and `tokenizerBytes`.
 
@@ -120,22 +157,26 @@ CoroutineScope(Dispatchers.IO).launch {
 }
 ```
 
-Once the `init` functions completes its execution, we can call the `encode` function to transform the given `sentence` to an embedding,
+Once the `init` functions completes its execution, we can call the `encode` function to transform
+the given `sentence` to an embedding,
 
 ```kotlin
 CoroutineScope(Dispatchers.IO).launch {
-    val embedding: FloatArray = sentenceEmbedding.encode( "Delhi has a population 32 million" )
-    println( "Embedding: $embedding" )
-    println( "Embedding size: ${embedding.size}")
+    val embedding: FloatArray = sentenceEmbedding.encode("Delhi has a population 32 million")
+    println("Embedding: $embedding")
+    println("Embedding size: ${embedding.size}")
 }
 ```
 
 ### Compute Cosine Similarity
 
-The embeddings are vectors whose relative similarity can be computed by measuring the cosine of the angle between the vectors, also termed as *cosine similarity*,
+The embeddings are vectors whose relative similarity can be computed by measuring the cosine of the
+angle between the vectors, also termed as *cosine similarity*,
 
 > [!TIP]
-> Here's an excellent [blog](https://towardsdatascience.com/cosine-similarity-how-does-it-measure-the-similarity-maths-behind-and-usage-in-python-50ad30aad7db) to under cosine similarity
+> Here's an
+> excellent [blog](https://towardsdatascience.com/cosine-similarity-how-does-it-measure-the-similarity-maths-behind-and-usage-in-python-50ad30aad7db)
+> to under cosine similarity
 
 ```kotlin
 private fun cosineDistance(
@@ -156,26 +197,36 @@ private fun cosineDistance(
 }
 
 CoroutineScope(Dispatchers.IO).launch {
-    val e1: FloatArray = sentenceEmbedding.encode( "Delhi has a population 32 million" )
-    val e2: FloatArray = sentenceEmbedding.encode( "What is the population of Delhi?" )
-    val e3: FloatArray = sentenceEmbedding.encode( "Cities with a population greater than 4 million are termed as metro cities" )
-    
-    val d12 = cosineDistance( e1 , e2 )
-    val d13 = cosineDistance( e1 , e3 )
-    println( "Similarity between e1 and e2: $d12" )
-    println( "Similarity between e1 and e3: $d13" )
+    val e1: FloatArray = sentenceEmbedding.encode("Delhi has a population 32 million")
+    val e2: FloatArray = sentenceEmbedding.encode("What is the population of Delhi?")
+    val e3: FloatArray =
+        sentenceEmbedding.encode("Cities with a population greater than 4 million are termed as metro cities")
+
+    val d12 = cosineDistance(e1, e2)
+    val d13 = cosineDistance(e1, e3)
+    println("Similarity between e1 and e2: $d12")
+    println("Similarity between e1 and e3: $d13")
 }
 ```
 
 ## Adding New Models
 
-We demonstrate how the `snowflake-arctic-embed-s` model can be added to the sample application present in the `app` module.
+We demonstrate how the `snowflake-arctic-embed-s` model can be added to the sample application
+present in the `app` module.
 
-1. Download the [`model.onnx`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/onnx/model.onnx) and [`tokenizer.json`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/tokenizer.json) files from the HF [`snowflake-arctic-embed-s`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s) repository.
+1. Download the [
+   `model.onnx`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/onnx/model.onnx)
+   and [
+   `tokenizer.json`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s/blob/main/tokenizer.json)
+   files from the HF [
+   `snowflake-arctic-embed-s`](https://huggingface.co/Snowflake/snowflake-arctic-embed-s)
+   repository.
 
-2. Create a new sub-directory in `app/src/main/assets` named `snowflake-arctic-embed-s`, the copy the two files to the sub-directory.
+2. Create a new sub-directory in `app/src/main/assets` named `snowflake-arctic-embed-s`, the copy
+   the two files to the sub-directory.
 
-3. In `Config.kt`, add a new entry in the `Models` enum and a new branch in `getModelConfig` corresponding to the new model entry added in the enum,
+3. In `Config.kt`, add a new entry in the `Models` enum and a new branch in `getModelConfig`
+   corresponding to the new model entry added in the enum,
 
 ```kotlin
 enum class Model {
@@ -212,13 +263,20 @@ fun getModelConfig(model: Model): ModelConfig {
 }
 ```
 
-4. To determine the values for `useTokenTypeIds` and `outputTensorName`, open the model with [Netron](https://github.com/lutzroeder/netron) or load the model in Python with [`onnxruntime`](https://github.com/microsoft/onnxruntime). We need to check the names of the input and output tensors.
+4. To determine the values for `useTokenTypeIds` and `outputTensorName`, open the model
+   with [Netron](https://github.com/lutzroeder/netron) or load the model in Python with [
+   `onnxruntime`](https://github.com/microsoft/onnxruntime). We need to check the names of the input
+   and output tensors.
 
-With Netron, check if `token_type_ids` is the name of an input tensor. Accordingly, set the value of `useTokenTypeIds` while creating an instance of `ModelConfig`. For `outputTensorName`, choose the name of the output tensor which provides the embedding. For the `snowflake-arctic-embed-s` model, the name of that output tensor is `last_hidden_state`.
+With Netron, check if `token_type_ids` is the name of an input tensor. Accordingly, set the value of
+`useTokenTypeIds` while creating an instance of `ModelConfig`. For `outputTensorName`, choose the
+name of the output tensor which provides the embedding. For the `snowflake-arctic-embed-s` model,
+the name of that output tensor is `last_hidden_state`.
 
 ![Model input/output tensor names in Netron](resources/netron_image.png)
 
-The same information can be printed to the console with following Python snippet using the `onnxruntime` package,
+The same information can be printed to the console with following Python snippet using the
+`onnxruntime` package,
 
 ```python
 import onnxruntime as ort
