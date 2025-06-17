@@ -20,9 +20,7 @@ jobs:
         id: setup-ndk
         with:
           ndk-version: r28b
-          add-to-path: false
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          add-to-path: true
 
       - name: Install Rust targets for Android
         run: rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
@@ -30,6 +28,8 @@ jobs:
       - name: Build Rust code
         run:
           ./gradlew cargoBuild --stacktrace
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Build AAR for sentence_embeddings module
         run: ./gradlew :sentence_embeddings:assembleRelease --stacktrace

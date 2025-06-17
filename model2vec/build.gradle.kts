@@ -63,7 +63,7 @@ mavenPublishing {
     coordinates(
         "io.gitlab.shubham0204",
         "model2vec",
-        "0.0.6",
+        "v6",
     )
     pom {
         name = "Sentence-Embeddings-Android"
