@@ -64,7 +64,7 @@ mavenPublishing {
     coordinates(
         "io.gitlab.shubham0204",
         "sentence-embeddings",
-        "v6",
+        "v6.1",
     )
     pom {
         name = "Sentence-Embeddings-Android"
@@ -72,7 +72,7 @@ mavenPublishing {
             "Embeddings from sentence-transformers in Android! Supports all-MiniLM-L6-V2, bge-small-en, snowflake-arctic, model2vec models and more "
         inceptionYear = "2024"
         url = "https://github.com/shubham0204/Sentence-Embeddings-Android"
-        version = "v6"
+        version = "v6.1"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"

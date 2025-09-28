@@ -58,7 +58,7 @@ dependencies {
     // ... other packages
     
     // To use sentence-embeddings
-    implementation 'io.gitlab.shubham0204:sentence-embeddings:v6'
+    implementation 'io.gitlab.shubham0204:sentence-embeddings:v6.1'
     
     // To also use model2vec
     implementation 'io.gitlab.shubham0204:model2vec:v6'
